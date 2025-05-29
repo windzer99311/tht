@@ -48,56 +48,52 @@ if st.button("Download Video", key="download_button"):
     else:
         try:
             # Headers to mimic a browser request
-            headers = {
-                'Range': f'bytes={0}-{8000}',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Connection': 'keep-alive',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Cache-Control': 'max-age=0',
-                'Accept': '*/*',
-                'DNT': '1',
-                'TE': 'trailers'
-            }
-            # Send a GET request with streaming
-            response = requests.get(url, headers=headers, stream=True)
-            response.raise_for_status()  # Raise error if request fails
+            for i in range(10):
+                start=0
+                end=8000
+                headers = {
+                    'Range': f'bytes={start}-{end}',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Connection': 'keep-alive',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Cache-Control': 'max-age=0',
+                    'Accept': '*/*',
+                    'DNT': '1',
+                    'TE': 'trailers'
+                }
+                # Send a GET request with streaming
+                response = requests.get(url, headers=headers, stream=True)
+                response.raise_for_status()  # Raise error if request fails
 
-            # Get file size for progress bar
-            file_size = int(response.headers.get('content-length', 0))
-            st.info(f"File size: {file_size / (1024 * 1024):.2f} MB")
+                # Get file size for progress bar
+                file_size = int(response.headers.get('content-length', 0))
+                st.info(f"File size: {file_size / (1024 * 1024):.2f} MB")
+                start=end+1
+                end=end+8000
 
-            # Progress bar
-            progress_bar = st.progress(0)
-            status_text = st.empty()
+                # Progress bar
+                progress_bar = st.progress(0)
+                status_text = st.empty()
 
-            # Download in chunks and save
-            output_file = "downloaded_video.mp4"
-            downloaded_bytes = 0
 
-            with open(output_file, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-                        downloaded_bytes += len(chunk)
-                        progress = int((downloaded_bytes / file_size) * 100)
-                        progress_bar.progress(progress)
-                        status_text.text(f"Downloading... {progress}%")
+                # Download in chunks and save
+                output_file = "downloaded_video.mp4"
+                downloaded_bytes = 0
+                with open(output_file, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+                            downloaded_bytes += len(chunk)
+                            progress = int((downloaded_bytes / file_size) * 100)
+                            progress_bar.progress(progress)
+                            status_text.text(f"Downloading... {progress}%")
 
-            st.success("✅ Video downloaded successfully!")
-            st.balloons()
+                st.success("✅ Video downloaded successfully!")
 
-            # Provide download link
-            with open(output_file, "rb") as f:
-                video_bytes = f.read()
-            st.download_button(
-                label="Click to Save Video",
-                data=video_bytes,
-                file_name="downloaded_video.mp4",
-                mime="video/mp4",
-            )
 
-            # Clean up (remove the file after download)
-            os.remove(output_file)
+                # Provide download link
+                # Clean up (remove the file after download)
+                os.remove(output_file)
 
         except requests.exceptions.RequestException as e:
             st.error(f"❌ Error downloading video: {e}")
