@@ -49,10 +49,15 @@ if st.button("Download Video", key="download_button"):
         try:
             # Headers to mimic a browser request
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Referer': 'https://www.youtube.com/',
+                'Range': f'bytes={0}-{8000}',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Connection': 'keep-alive',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Cache-Control': 'max-age=0',
+                'Accept': '*/*',
+                'DNT': '1',
+                'TE': 'trailers'
             }
-
             # Send a GET request with streaming
             response = requests.get(url, headers=headers, stream=True)
             response.raise_for_status()  # Raise error if request fails
